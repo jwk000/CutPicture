@@ -30,7 +30,7 @@ namespace CutPicture
         public Form1()
         {
             InitializeComponent();
-            
+
         }
 
 
@@ -49,7 +49,6 @@ namespace CutPicture
             UnregisterHotKey(this.Handle, 10086);
         }
 
-        Form f = new Form();
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
@@ -57,20 +56,9 @@ namespace CutPicture
             switch (m.Msg)
             {
                 case WM_HOTKEY:
-                    if(m.WParam.ToString() == "10086")
+                    if (m.WParam.ToString() == "10086")
                     {
-                        if(cutState== eCutStatus.None)
-                        {
-                            cutState = eCutStatus.Ready;
-                            Bitmap catchScreen = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-                            Graphics g = Graphics.FromImage(catchScreen);
-                            g.CopyFromScreen(new Point(0, 0), new Point(0, 0), Screen.PrimaryScreen.Bounds.Size);
-                            this.FormBorderStyle = FormBorderStyle.None;
-                            this.WindowState = FormWindowState.Maximized;
-                            this.BackgroundImage = catchScreen;
-                            this.Show();
-
-                        }
+                        cutPicture();
                     }
                     break;
                 default:
@@ -78,9 +66,25 @@ namespace CutPicture
             }
         }
 
+        private void cutPicture()
+        {
+            if (cutState == eCutStatus.None)
+            {
+                cutState = eCutStatus.Ready;
+                Bitmap catchScreen = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+                Graphics g = Graphics.FromImage(catchScreen);
+                g.CopyFromScreen(new Point(0, 0), new Point(0, 0), Screen.PrimaryScreen.Bounds.Size);
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.WindowState = FormWindowState.Maximized;
+                this.BackgroundImage = catchScreen;
+                this.Show();
+            }
+
+        }
+
         enum eCutStatus
         {
-            None,Ready,Begin,End
+            None, Ready, Begin, End
         }
 
         eCutStatus cutState = eCutStatus.None;
@@ -89,7 +93,7 @@ namespace CutPicture
         {
             base.OnMouseDown(e);
             if (cutState != eCutStatus.Ready) return;
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
                 cutRect.X = e.X;
                 cutRect.Y = e.Y;
@@ -133,7 +137,7 @@ namespace CutPicture
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
-            if(e.Button == MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 cutState = eCutStatus.None;
                 cutRect.Width = 0;
@@ -145,7 +149,7 @@ namespace CutPicture
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if(cutState == eCutStatus.Begin)
+            if (cutState == eCutStatus.Begin)
             {
                 cutRect.Width = e.X - cutRect.X;
                 cutRect.Height = e.Y - cutRect.Y;
@@ -153,13 +157,13 @@ namespace CutPicture
             }
         }
 
-        
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
             Graphics g = e.Graphics;
 
-            if(cutState != eCutStatus.None)
+            if (cutState != eCutStatus.None)
             {
                 Color backcolor = Color.FromArgb(155, Color.Black);
                 List<Rectangle> rects = new List<Rectangle>();
@@ -171,10 +175,23 @@ namespace CutPicture
             }
 
 
-            if(cutState == eCutStatus.Begin||cutState== eCutStatus.End)
+            if (cutState == eCutStatus.Begin || cutState == eCutStatus.End)
             {
                 g.DrawRectangle(Pens.Red, cutRect);
             }
         }
+
+        #region 托盘
+
+        private void 截图ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cutPicture();
+        }
+
+        private void 退出ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+        #endregion
     }
 }
